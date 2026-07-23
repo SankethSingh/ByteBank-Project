@@ -16,7 +16,3 @@ def validate_phone(phone:str) -> bool:
 
 def validate_pin(pin:str) -> bool:
     return bool(PIN_RE.match(pin or ""))
-
-
-# test
-print(validate_phone("+919963666523"))
