@@ -1,6 +1,8 @@
 import hashlib
 from datetime import datetime
 
+MAX_FAILED_ATTEMPTS = 3
+
 class AuthService:
     def __init__(self, acc_store):
         self.acc_store = acc_store
@@ -54,15 +56,43 @@ class AuthService:
         return True, f"Account created successfully. Your account number is {acc_no}.", acc_no
 
     # Login 
-    def login(self):
+    def login(self, acc_no, pin):
         """
         Verifies acc_no and pin against in-memory store.
         Tracks failed attempts and auto-blocks after MAX_FAILED_ATTEMPTS.
         Returns (success: bool, message: str, account: Account or None)"""
 
-        pass
+        account = self.acc_store.get(acc_no)
+        if account is None:
+            return False, "Account number not found.", None
 
+        if account.status == "blocked":
+            return False, "This account is blocked. Contact bank administrator.", None
+
+        if account.pin_hash != self._hash_pin(pin):
+            self.failed_attempts[acc_no] = self.failed_attempts.get(acc_no, 0) + 1
+
+            if self.failed_attempts[acc_no] >= MAX_FAILED_ATTEMPTS:
+                account.status = "blocked"
+                file_handler.sync_account(account)
+                return False, "Too many failed attempts. Account has been blocked.", None
+            remaining = MAX_FAILED_ATTEMPTS - self.failed_attempts[acc_no]
+            return False, f"Incorrect PIN. {remaining} attempt(s) remaining.", None
+
+        self.failed_attempts[acc_no] = 0 # login resets counter
+        return True, "Login Successful.", account
+    
     # change pin method
-    def change_pin(self):
-        pass
+    def change_pin(self, acc_no, old_pin, new_pin):
+        account = self.account_store.get(acc_no)
+        if account is None:
+            return False, "Account not found."
+        if account.pin_hash != self._hash_pin(old_pin):
+            return False, "Old PIN is incorrect."
+        if not validator.validate_pin(new_pin):
+            return False, "New PIN must be a 4-digit number."
+
+        account.pin_hash = self._hash_pin(new_pin)
+        file_handler.sync_account(account)
+        return True, "PIN updated successfully."
 
