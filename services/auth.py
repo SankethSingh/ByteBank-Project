@@ -1,6 +1,12 @@
 import hashlib
 from datetime import datetime
 
+from utils import validator
+from utils import id_generator
+from utils import file_handler
+from models.savings_account import SavingsAccount
+from models.current_account import CurrentAccount
+
 MAX_FAILED_ATTEMPTS = 3
 
 class AuthService:
