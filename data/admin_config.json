@@ -1,0 +1,10 @@
+{
+    "admin": {
+        "username": "admin",
+        "password": "admin123"
+    },
+    "bank": {
+        "interest_rate": 5,
+        "overdraft_limit": 10000
+    }
+}
