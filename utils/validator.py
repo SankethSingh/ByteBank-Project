@@ -5,7 +5,7 @@ utils/validator - Regex based validation helpers used across auth, admin, and re
 import re
 
 EMAIL_RE = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$")
-PHONE_RE = re.compile(r"^(+91)?[6-9]\d{9}$")     # 10 digit number
+PHONE_RE = re.compile(r"^(\+91)?[6-9]\d{9}$")     # 10 digit number
 PIN_RE = re.compile(r"\d{4}$")   # 4 digit PIN format
 
 def validate_email(email:str) -> bool:

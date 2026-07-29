@@ -10,8 +10,8 @@ from models.current_account import CurrentAccount
 MAX_FAILED_ATTEMPTS = 3
 
 class AuthService:
-    def __init__(self, acc_store):
-        self.acc_store = acc_store
+    def __init__(self, account_store):
+        self.account_store = account_store
         self.failed_attempts = {}  #acc_no -> int, in-memory only
     
     @staticmethod
@@ -36,7 +36,7 @@ class AuthService:
         if initial_deposit < 0:
             return False, "Initial deposit cannot be negative.", None
         
-        acc_no = id_generator.generate_acc_no(account_type, self.acc_store)
+        acc_no = id_generator.generate_acc_no(account_type, self.account_store)
         pin_hash = self._hash_pin(pin)
         created_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -68,7 +68,7 @@ class AuthService:
         Tracks failed attempts and auto-blocks after MAX_FAILED_ATTEMPTS.
         Returns (success: bool, message: str, account: Account or None)"""
 
-        account = self.acc_store.get(acc_no)
+        account = self.account_store.get(acc_no)
         if account is None:
             return False, "Account number not found.", None
 

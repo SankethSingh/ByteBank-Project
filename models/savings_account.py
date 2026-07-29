@@ -7,24 +7,16 @@ class SavingsAccount(Account):
 
     MINIMUM_BALANCE = 1000
 
-    def __init__(
-            self,
-            account_no: int,
-            name: str,
-            email: str,
-            password: int,
-            balance: float = 0.0
-    ):
+    def __init__(self, acc_no, name, email, phone, pin_hash,
+                 balance=0.0, status="active", created_date=None,
+                 interest_rate=4.0):
 
-        super().__init__(
-            account_no,
-            name,
-            email,
-            password,
-            balance
-        )
+        super().__init__(acc_no, name, email, phone, pin_hash,
+                          balance, status, created_date)
 
         self.account_type = "Savings"
+        self.interest_rate = interest_rate
+
 
     # -------------------------
     # Get Account Type
@@ -70,7 +62,7 @@ class SavingsAccount(Account):
 
         return {
             "Account Type": self.account_type,
-            "Account Number": self.account_no,
+            "Account Number": self.acc_no,
             "Account Holder": self.name,
             "Balance": self.balance,
             "Interest Rate": f"{self.INTEREST_RATE}%"

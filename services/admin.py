@@ -1,6 +1,9 @@
+from utils import file_handler
+
 class Admin:
 
-    def __init__(self):
+    def __init__(self, acc_store):
+        self.acc_store = acc_store
         self.interest_rate = 5
         self.overdraft_limit = 10000
 
@@ -15,12 +18,16 @@ class Admin:
         print("Invalid Username or Password")
         return False
 
-    def change_interest_rate(self):
+    def change_interest_rate(self, account_store):
         print("Current Interest Rate:", self.interest_rate)
-
         new_rate = float(input("Enter New Interest Rate: "))
         self.interest_rate = new_rate
-
+    
+        for account in account_store.values():
+            if hasattr(account, "interest_rate"):
+                account.interest_rate = new_rate
+                file_handler.sync_account(account)
+    
         print("Interest Rate Updated Successfully")
 
     def change_overdraft_limit(self):
@@ -32,59 +39,76 @@ class Admin:
         print("Overdraft Limit Updated Successfully")
 
     def search_customer(self, customers):
-        account_number = input("Enter Account Number: ")
+        query = input("Enter name, email, or phone to search: ").strip().lower()
 
-        found = False
+        matches = [
+            c for c in customers
+            if query in c.name.lower() or query in c.email.lower() or query in c.phone
+        ]
 
-        for customer in customers:
-            if customer.account_number == account_number:
-                print("Customer Found")
-                print("Name :", customer.name)
-                print("Account Number :", customer.account_number)
-                print("Phone :", customer.phone)
-                print("Balance : ₹", customer.balance)
-                print("Status :", customer.status)
-                found = True
-                break
+        if not matches:
+            print("No matching customers found.")
+            return
 
-        if not found:
-            print("Customer Not Found")
+        print(f"\nFound {len(matches)} matching customer(s):")
+        for customer in matches:
+            print(f"- {customer.acc_no} | {customer.name} | {customer.phone} | ₹{customer.balance} | {customer.status}")
+
 
     def block_customer(self, customers):
         account_number = input("Enter Account Number: ")
 
         for customer in customers:
-            if customer.account_number == account_number:
-                customer.status = "Blocked"
+            if customer.acc_no == account_number:
+                customer.status = "blocked"
+                file_handler.sync_account(customer)
                 print("Customer Account Blocked")
                 return
 
         print("Customer Not Found")
 
+
     def unblock_customer(self, customers):
         account_number = input("Enter Account Number: ")
 
         for customer in customers:
-            if customer.account_number == account_number:
-                customer.status = "Active"
+            if customer.acc_no == account_number:
+                customer.status = "active"
+                file_handler.sync_account(customer)
                 print("Customer Account Unblocked")
                 return
 
         print("Customer Not Found")
 
+
+    def audit_report(self, customers):
+        total_balance = 0
+
+        for customer in customers:
+            total_balance = total_balance + customer.balance
+
+        print()
+        print("Bank Report")
+        print("-----------")
+        print("Total Customers :", len(customers))
+        print("Total Balance : ₹", total_balance)
+
     def view_customer(self, customers):
         account_number = input("Enter Account Number: ")
 
         for customer in customers:
-            if customer.account_number == account_number:
+            if customer.acc_no == account_number:
                 print()
                 print("Customer Details")
                 print("----------------")
                 print("Name :", customer.name)
-                print("Account Number :", customer.account_number)
+                print("Account Number :", customer.acc_no)
+                print("Account Type :", customer.get_account_type())
                 print("Phone :", customer.phone)
+                print("Email :", customer.email)
                 print("Balance : ₹", customer.balance)
                 print("Status :", customer.status)
+                print("Created Date :", customer.created_date)
                 return
 
         print("Customer Not Found")
@@ -103,7 +127,7 @@ class Admin:
 
     def menu(self, customers):
         while True:
-
+        
             print()
             print("========== ADMIN MENU ==========")
             print("1. Change Interest Rate")
@@ -141,6 +165,6 @@ class Admin:
             elif choice == "8":
                 print("Logged Out")
                 break
-
+            
             else:
                 print("Invalid Choice")
